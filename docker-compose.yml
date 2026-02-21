@@ -1,0 +1,49 @@
+# Docker Compose for Multi-Brand Deployment
+# ------------------------------------------
+# This configuration allows running both brand applications simultaneously.
+#
+# IMPORTANT:
+# If your system has an older version of Docker/buildx, 'docker-compose build' might fail.
+# In that case, use the provided manual build script:
+#   npm run docker:build
+#   npm run docker:up
+#
+services:
+  # project-a (Brand A)
+  # - URL: http://localhost:3000
+  # - Theme: Green
+  # - Build: Multistage build targeting the 'project-a' package
+  project-a:
+    image: rhino-project-a:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: project-a
+        PORT: 3000
+    ports:
+      - "3000:3000"
+    environment:
+      # Use a 32+ character secret for JWT signing in production
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-32-chars-at-least}
+      - NEXT_PUBLIC_APP_NAME=Project A
+    restart: always
+
+  # project-b (Brand B)
+  # - URL: http://localhost:3001
+  # - Theme: Red
+  # - Build: Multistage build targeting the 'project-b' package
+  project-b:
+    image: rhino-project-b:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: project-b
+        PORT: 3001
+    ports:
+      - "3001:3001"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-32-chars-at-least}
+      - NEXT_PUBLIC_APP_NAME=Project B
+    restart: always
