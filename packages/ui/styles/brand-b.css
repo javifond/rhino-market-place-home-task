@@ -1,0 +1,26 @@
+/**
+ * Brand B Theme Override
+ *
+ * Project B visual identity:
+ * - Primary: Red (#dc2626)
+ * - Typography: Georgia (classic, editorial)
+ * - Border radius: Large/rounded (16-20px)
+ * - Navigation: Side vertical panel
+ *
+ * Applied via: <html data-brand="brand-b">
+ */
+
+[data-brand="brand-b"] {
+  /* Red primary palette */
+  --color-primary: #dc2626;
+  --color-primary-hover: #b91c1c;
+  --color-primary-foreground: #ffffff;
+
+  /* Editorial serif headings */
+  --font-heading: "Georgia", serif;
+
+  /* Soft, friendly corners */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+}
