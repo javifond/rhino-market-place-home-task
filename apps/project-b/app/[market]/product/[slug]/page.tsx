@@ -1,6 +1,6 @@
 import { getSession } from '@/lib/auth';
-import { ROUTES, isValidMarket } from '@repo/constants';
-import type { ProductDetail } from '@repo/types';
+import { ROUTES, isFeatureEnabled, isValidMarket } from '@repo/constants';
+import type { Market, ProductDetail } from '@repo/types';
 import { Button } from '@repo/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -83,6 +83,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const session = await getSession();
   const isAuthenticated = session !== null;
+  const showReviews = isFeatureEnabled('SHOW_REVIEWS', market as Market, 'brand-b');
 
   const discountedPrice =
     product.discountPercentage > 0 ? product.price * (1 - product.discountPercentage / 100) : null;
@@ -295,7 +296,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </section>
 
           {/* Reviews */}
-          {product.reviews && product.reviews.length > 0 && (
+          {showReviews && product.reviews && product.reviews.length > 0 && (
             <section>
               <h2
                 style={{
