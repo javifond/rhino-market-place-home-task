@@ -10,3 +10,6 @@ export type { PageLayoutProps } from './components/Layout';
 
 export { LoginForm } from './components/LoginForm';
 export type { LoginFormProps } from './components/LoginForm';
+
+export { ProductCard } from './components/ProductCard';
+export type { ProductCardProps, ProductCardLayout } from './components/ProductCard';
