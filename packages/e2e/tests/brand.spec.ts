@@ -27,9 +27,9 @@ async function login(
 }
 
 test.describe('Brand-specific rendering — project-a', () => {
-  test.skip(({ browserName: _browserName }, testInfo) => {
-    return testInfo.project.name !== 'project-a';
-  }, 'Only runs on project-a');
+  test.beforeEach((_, testInfo) => {
+    test.skip(testInfo.project.name !== 'project-a', 'Only runs on project-a');
+  });
 
   test('renders product cards with vertical layout', async ({ page }, testInfo) => {
     const { email, password } = getCredentials(testInfo.project.name);
@@ -55,9 +55,9 @@ test.describe('Brand-specific rendering — project-a', () => {
 });
 
 test.describe('Brand-specific rendering — project-b', () => {
-  test.skip(({ browserName: _browserName }, testInfo) => {
-    return testInfo.project.name !== 'project-b';
-  }, 'Only runs on project-b');
+  test.beforeEach((_, testInfo) => {
+    test.skip(testInfo.project.name !== 'project-b', 'Only runs on project-b');
+  });
 
   test('renders product cards with horizontal layout', async ({ page }, testInfo) => {
     const { email, password } = getCredentials(testInfo.project.name);

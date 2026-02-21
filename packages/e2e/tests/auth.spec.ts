@@ -46,8 +46,9 @@ test.describe('Authentication flow', () => {
     await page.click('[type="submit"]');
 
     // Should show error message
-    await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('[role="alert"]')).toContainText('Invalid email or password');
+    const errorMessage = page.locator('form [role="alert"]');
+    await expect(errorMessage).toBeVisible({ timeout: 5000 });
+    await expect(errorMessage).toContainText('Invalid email or password');
   });
 
   test('logout clears session and redirects to login on protected route', async ({
