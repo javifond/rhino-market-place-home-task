@@ -7,9 +7,9 @@ import styles from './LoginForm.module.css';
 
 export interface LoginFormProps {
   /** URL to redirect to after successful login */
-  callbackUrl?: string;
+  callbackUrl?: string | undefined;
   /** Additional CSS class */
-  className?: string;
+  className?: string | undefined;
 }
 
 /**
