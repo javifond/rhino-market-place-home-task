@@ -14,7 +14,8 @@
     "lint": "biome lint --write .",
     "format": "biome format --write .",
     "check": "biome check --write .",
-    "check:ci": "biome check --reporter=github ."
+    "check:ci": "biome check --reporter=github .",
+    "test:e2e": "turbo test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
