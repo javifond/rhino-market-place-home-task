@@ -243,15 +243,17 @@ Does component need:
 ```mermaid
 flowchart TD
     REQ[Request arrives] --> MW{middleware.ts}
-    MW -->|"public route\n/, /[market], /[market]/login"| PUB[Render public page\nrobots: index:true]
-    MW -->|"protected route\n/[market]/products\n/[market]/product/*"| AUTH{Valid JWT\nin session cookie?}
+
+    MW -->|"public route\n/, /[market], /[market]/login"| PUB_CHECK{getSession}
+    PUB_CHECK -->|"user exists"| PUB_AUTH[Render public page\nrobots: index:true\nuser-aware content]
+    PUB_CHECK -->|"null"| PUB_GUEST[Render public page\nrobots: index:true\nguest content]
+
+    MW -->|"protected route\n/[market]/products\n/[market]/product/*"| AUTH{Valid JWT?}
     AUTH -->|No| REDIR[Redirect to\n/[market]/login?callbackUrl=...]
-    AUTH -->|Yes| CHECK[Server Component]
-    CHECK --> META{getSession()}
-    META -->|authenticated| PRIV[Render with\nrobots: noindex\nshow reviews/warranty]
-    META -->|null| GUEST[Render with\nrobots: index:true\nhide reviews/warranty]
-    REDIR --> LOGIN[Login Page\nPOST /api/auth/login\n→ bcrypt.compare\n→ 100ms delay\n→ set httpOnly cookie]
-    LOGIN --> CHECK
+    AUTH -->|Yes| PROTECTED[Server Component\ngetSession → user\nrobots: noindex\nshow reviews/warranty]
+
+    REDIR --> LOGIN[Login Page\nPOST /api/auth/login\n→ bcrypt.compare\n→ set httpOnly cookie]
+    LOGIN -->|success| AUTH
 ```
 
 ### JWT Session Management
@@ -501,10 +503,22 @@ if (!isValidMarket(market)) {
 
 ```mermaid
 flowchart TD
-    CHECK["isFeatureEnabled(flag, market, brandId?)"]
-    CHECK --> BRAND{Brand override\nexists?}
-    BRAND -->|Yes| USE_BRAND[Use BRAND_FEATURE_OVERRIDES]
-    BRAND -->|No| USE_MARKET[Use FEATURE_FLAGS[market]]
+    CALL["isFeatureEnabled(flag, market, brandId?)"]
+    CALL --> HAS_BRAND{brandId\nprovided?}
+    HAS_BRAND -->|No| MARKET_VAL[FEATURE_FLAGS[market][flag]]
+    HAS_BRAND -->|Yes| OVERRIDE_CHECK{BRAND_FEATURE_OVERRIDES\n[brandId][flag]\n!== undefined?}
+    OVERRIDE_CHECK -->|Yes| BRAND_VAL[BRAND_FEATURE_OVERRIDES[brandId][flag]]
+    OVERRIDE_CHECK -->|No| MARKET_VAL
+    BRAND_VAL --> RETURN[return boolean]
+    MARKET_VAL --> RETURN
+
+    subgraph "Example: SHOW_REVIEWS"
+        EX1["en, brand-a → false (brand override)"]
+        EX2["en, brand-b → true (brand override)"]
+        EX3["en, no brand → true (market default)"]
+        EX4["ca, brand-a → false (brand override)"]
+        EX5["ca, no brand → false (market default)"]
+    end
 ```
 
 ### Configuration
