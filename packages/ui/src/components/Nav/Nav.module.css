@@ -1,0 +1,119 @@
+/**
+ * Navigation Styles
+ * Supports both top (horizontal) and side (vertical) layouts.
+ */
+
+.nav {
+  display: flex;
+  background-color: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Top Navigation (Horizontal Bar)
+   ───────────────────────────────────────────────────────────── */
+
+.top {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--nav-height);
+  padding: 0 var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.top .links {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-6);
+}
+
+.top .marketSwitcher {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Side Navigation (Vertical Sidebar)
+   ───────────────────────────────────────────────────────────── */
+
+.side {
+  flex-direction: column;
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  padding: var(--space-6);
+  border-right: 1px solid var(--color-border);
+}
+
+.side .brand {
+  margin-bottom: var(--space-8);
+}
+
+.side .links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.side .marketSwitcher {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Shared Elements
+   ───────────────────────────────────────────────────────────── */
+
+.brand {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.link:hover {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.marketSwitcher {
+  font-size: var(--text-sm);
+}
+
+.marketLink {
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.marketLink:hover {
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+.marketLink.active {
+  color: var(--color-primary);
+  font-weight: 500;
+}

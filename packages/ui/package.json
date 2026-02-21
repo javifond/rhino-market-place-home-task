@@ -6,12 +6,20 @@
     ".": "./src/index.ts",
     "./styles/*": "./styles/*"
   },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/constants": "workspace:*",
+    "@repo/types": "workspace:*"
+  },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/react": "^19.0.0",
     "typescript": "^5.7.0"
   }
 }
