@@ -1,0 +1,16 @@
+[
+  {
+    "id": "user-1",
+    "email": "user@project-b.com",
+    "name": "Test User",
+    "passwordHash": "$2a$10$seavM9BiH8fngMr2y135ye52fKyQJR.A.qWsTSq.y/N0gq5ODPdUa",
+    "role": "user"
+  },
+  {
+    "id": "admin-1",
+    "email": "admin@project-b.com",
+    "name": "Admin User",
+    "passwordHash": "$2a$10$seavM9BiH8fngMr2y135ye52fKyQJR.A.qWsTSq.y/N0gq5ODPdUa",
+    "role": "admin"
+  }
+]
