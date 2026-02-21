@@ -1,7 +1,9 @@
-export default function HomePage() {
-  return (
-    <main>
-      <h1>Project A</h1>
-    </main>
-  );
+import { redirect } from 'next/navigation';
+
+/**
+ * Root page redirects to the default market.
+ * Users hitting `/` are immediately sent to `/en`.
+ */
+export default function RootPage() {
+  redirect('/en');
 }
