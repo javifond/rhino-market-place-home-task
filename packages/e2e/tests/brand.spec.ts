@@ -27,7 +27,8 @@ async function login(
 }
 
 test.describe('Brand-specific rendering — project-a', () => {
-  test.beforeEach((_, testInfo) => {
+  // biome-ignore lint/correctness/noEmptyPattern: Playwright requires destructuring for first arg to access testInfo
+  test.beforeEach(({}, testInfo) => {
     test.skip(testInfo.project.name !== 'project-a', 'Only runs on project-a');
   });
 
@@ -55,7 +56,8 @@ test.describe('Brand-specific rendering — project-a', () => {
 });
 
 test.describe('Brand-specific rendering — project-b', () => {
-  test.beforeEach((_, testInfo) => {
+  // biome-ignore lint/correctness/noEmptyPattern: Playwright requires destructuring for first arg to access testInfo
+  test.beforeEach(({}, testInfo) => {
     test.skip(testInfo.project.name !== 'project-b', 'Only runs on project-b');
   });
 
