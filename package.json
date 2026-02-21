@@ -9,6 +9,10 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "build:project-a": "turbo build --filter=project-a",
+    "build:project-b": "turbo build --filter=project-b",
+    "dev:project-a": "turbo dev --filter=project-a",
+    "dev:project-b": "turbo dev --filter=project-b",
     "test": "turbo test",
     "check-types": "turbo check-types",
     "lint": "biome lint --write .",
