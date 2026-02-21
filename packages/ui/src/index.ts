@@ -7,3 +7,6 @@ export type { NavProps } from './components/Nav';
 
 export { PageLayout } from './components/Layout';
 export type { PageLayoutProps } from './components/Layout';
+
+export { LoginForm } from './components/LoginForm';
+export type { LoginFormProps } from './components/LoginForm';

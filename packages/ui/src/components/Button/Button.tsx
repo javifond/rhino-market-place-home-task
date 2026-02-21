@@ -25,7 +25,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Button content */
   children: ReactNode;
   /** Additional CSS class */
-  className?: string;
+  className?: string | undefined;
 }
 
 /**
