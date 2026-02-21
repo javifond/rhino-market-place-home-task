@@ -28,29 +28,29 @@ const mockProduct: Product = {
 
 describe('Project B ProductCard Override', () => {
   it('renders with horizontal layout class', () => {
-    const { container } = render(<ProductCard product={mockProduct} />);
+    const { container } = render(<ProductCard product={mockProduct} market="en" />);
     const card = container.querySelector('article');
     expect(card).toHaveClass('horizontal');
   });
 
   it('shows category tags', () => {
-    render(<ProductCard product={mockProduct} />);
+    render(<ProductCard product={mockProduct} market="en" />);
     expect(screen.getByText('electronics')).toBeInTheDocument();
   });
 
   it('renders 2 thumbnails', () => {
-    render(<ProductCard product={mockProduct} />);
+    render(<ProductCard product={mockProduct} market="en" />);
     const images = screen.getAllByRole('img');
     expect(images).toHaveLength(2);
   });
 
-  it('renders brand-specific action label', () => {
-    render(<ProductCard product={mockProduct} />);
-    expect(screen.getByRole('button', { name: 'Hello from Red Project' })).toBeInTheDocument();
+  it('renders View Details action label', () => {
+    render(<ProductCard product={mockProduct} market="en" />);
+    expect(screen.getByRole('button', { name: 'View Details' })).toBeInTheDocument();
   });
 
   it('renders the product title', () => {
-    render(<ProductCard product={mockProduct} />);
+    render(<ProductCard product={mockProduct} market="en" />);
     expect(screen.getByText('Test Product')).toBeInTheDocument();
   });
 });

@@ -107,7 +107,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
         }}
       >
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} market={market} />
         ))}
       </div>
     </section>

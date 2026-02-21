@@ -1,11 +1,15 @@
 'use client';
 
-import type { Product } from '@repo/types';
+import { ROUTES } from '@repo/constants';
+import type { Market, Product } from '@repo/types';
 import { ProductCard as BaseProductCard } from '@repo/ui';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
   /** Product data to display */
   product: Product;
+  /** Current market for navigation */
+  market: Market;
   /** Additional CSS class */
   className?: string | undefined;
 }
@@ -17,7 +21,7 @@ interface ProductCardProps {
  * - Layout: vertical (image on top)
  * - Categories: hidden
  * - Thumbnails: 1 image
- * - Action: "Hello from Green Project" alert
+ * - Action: navigates to product detail page
  *
  * This is a Client Component because it uses an onClick handler.
  *
@@ -25,13 +29,15 @@ interface ProductCardProps {
  * ```tsx
  * // In a product listing page
  * {products.map((product) => (
- *   <ProductCard key={product.id} product={product} />
+ *   <ProductCard key={product.id} product={product} market="en" />
  * ))}
  * ```
  */
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({ product, market, className }: ProductCardProps) {
+  const router = useRouter();
+
   function handleAction() {
-    alert('Hello from Green Project');
+    router.push(ROUTES.product(market, String(product.id)));
   }
 
   return (
@@ -40,7 +46,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       layout="vertical"
       showCategories={false}
       thumbnailCount={1}
-      actionLabel="Hello from Green Project"
+      actionLabel="View Details"
       onAction={handleAction}
       className={className}
     />
