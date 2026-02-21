@@ -193,7 +193,6 @@ services:
 ## Further Reading
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — Detailed architecture decisions, diagrams, and patterns
-- [.claude/CLAUDE.md](./.claude/CLAUDE.md) — Agent development guide
 
 ## License
 
