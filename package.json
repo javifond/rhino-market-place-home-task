@@ -11,9 +11,22 @@
     "build": "turbo build",
     "test": "turbo test",
     "check-types": "turbo check-types",
-    "lint": "turbo lint"
+    "lint": "biome lint --write .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "check:ci": "biome check --reporter=github ."
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "lint-staged": "^15.2.0",
+    "simple-git-hooks": "^2.11.0",
     "turbo": "^2.8.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx,json}": ["biome check --write --no-errors-on-unmatched"],
+    "**/*.css": ["biome format --write --no-errors-on-unmatched"]
   }
 }
