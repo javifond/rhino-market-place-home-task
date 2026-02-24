@@ -60,7 +60,7 @@ rhino-monorepo/
 │   ├── project-a/          # Brand A Next.js app
 │   └── project-b/          # Brand B Next.js app
 ├── packages/
-│   ├── api/                 # @repo/api — Shared data fetching logic (fetchProducts)
+│   ├── api/                # @repo/api — Shared data fetching logic (fetchProducts)
 │   ├── ui/                 # @repo/ui — Shared components + CSS tokens
 │   ├── types/              # @repo/types — TypeScript interfaces
 │   ├── constants/          # @repo/constants — Routes, markets, feature flags
