@@ -11,6 +11,7 @@
     "lint": "biome check ."
   },
   "dependencies": {
+    "@repo/api": "workspace:*",
     "@repo/constants": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
