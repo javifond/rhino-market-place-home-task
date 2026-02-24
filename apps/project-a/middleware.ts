@@ -18,7 +18,7 @@ function getJwtKey(): Uint8Array | null {
  * URL patterns that require authentication.
  * Uses regex to match dynamic route segments.
  */
-const PROTECTED_PATTERNS = [/^\/[a-z]{2}\/products(\/.*)?$/, /^\/[a-z]{2}\/product\/.*$/];
+const PROTECTED_PATTERNS = [/^\/[a-z]{2}\/product\/.*$/];
 
 /**
  * Middleware for route protection.

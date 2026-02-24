@@ -118,30 +118,25 @@ const nextConfig: NextConfig = {
 ```mermaid
 sequenceDiagram
     participant Browser
-    participant Middleware as middleware.ts
-    participant Server as Next.js Server
-    participant ISR as ISR Cache (5min)
     participant API as dummyjson.com
 
     Browser->>Middleware: GET /en/products
-    Middleware->>Middleware: jwtVerify(session cookie)
-    alt No valid session
-        Middleware-->>Browser: redirect /en/login?callbackUrl=...
-    else Valid session
+    Middleware->>Middleware: Check PROTECTED_PATTERNS
+    alt Public Route (/en/products)
         Middleware->>Server: NextResponse.next()
         Server->>Server: fetchProducts() (@repo/api)
         Server->>ISR: fetch()
-        alt Cache HIT (< 5min stale)
-            ISR-->>Server: cached product list
-        else Cache MISS / STALE
-            ISR->>API: GET /products?limit=30
-            API-->>ISR: product data
-            Note over ISR: shuffle first 10 items
-            Note over ISR: console.log("[ISR] refreshed")
-            ISR-->>Server: fresh product list
+        ISR-->>Server: product data
+        Server-->>Browser: SSR HTML (index: true)
+    else Protected Route (/en/product/123)
+        Middleware->>Middleware: jwtVerify(session cookie)
+        alt No valid session
+            Middleware-->>Browser: redirect /en/login?callbackUrl=...
+        else Valid session
+            Middleware->>Server: NextResponse.next()
+            Server->>Server: fetchProductDetails()
+            Server-->>Browser: SSR HTML (noindex)
         end
-        Server->>Server: generateMetadata()\n→ noindex if authenticated
-        Server-->>Browser: SSR HTML + SEO meta
     end
 ```
 
@@ -251,11 +246,11 @@ Does component need:
 flowchart TD
     REQ[Request arrives] --> MW{middleware.ts}
 
-    MW -->|"public route\n/, /[market], /[market]/login"| PUB_CHECK{getSession}
+    MW -->|"public route\n/, /[market], /[market]/products, /[market]/login"| PUB_CHECK{getSession}
     PUB_CHECK -->|"user exists"| PUB_AUTH[Render public page\nrobots: index:true\nuser-aware content]
     PUB_CHECK -->|"null"| PUB_GUEST[Render public page\nrobots: index:true\nguest content]
 
-    MW -->|"protected route\n/[market]/products\n/[market]/product/*"| AUTH{Valid JWT?}
+    MW -->|"protected route\n/[market]/product/*"| AUTH{Valid JWT?}
     AUTH -->|No| REDIR["Redirect to\n/[market]/login?callbackUrl=..."]
     AUTH -->|Yes| PROTECTED[Server Component\ngetSession → user\nrobots: noindex\nshow reviews/warranty]
 
@@ -293,7 +288,6 @@ export async function getSession(): Promise<UserPayload | null> {
 
 ```typescript
 const PROTECTED_PATTERNS = [
-  /^\/[a-z]{2}\/products(\/.*)?$/,   // /en/products, /ca/products
   /^\/[a-z]{2}\/product\/.*$/,        // /en/product/123
 ];
 ```
