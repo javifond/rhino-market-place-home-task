@@ -93,6 +93,9 @@ importers:
 
   apps/project-b:
     dependencies:
+      '@repo/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@repo/constants':
         specifier: workspace:*
         version: link:../../packages/constants
