@@ -1,50 +1,9 @@
 import { ProductCard } from '@/components/overrides/ProductCard';
 import { getSession } from '@/lib/auth';
+import { fetchProducts } from '@repo/api';
 import { isValidMarket } from '@repo/constants';
-import type { Product, ProductList } from '@repo/types';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-
-interface ProductsPageProps {
-  params: Promise<{ market: string }>;
-}
-
-/**
- * Fetches products from the API with ISR caching (5 minute revalidation).
- * Shuffles the first 10 products to evidence cache refreshes.
- */
-async function fetchProducts(): Promise<ProductList> {
-  const res = await fetch(
-    'https://dummyjson.com/products?limit=30&select=id,title,description,price,discountPercentage,rating,stock,brand,category,thumbnail,images',
-    {
-      next: { revalidate: 300, tags: ['products'] },
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch products: ${res.status}`);
-  }
-
-  const data: ProductList = await res.json();
-
-  // Shuffle first 10 for content variation (evidences ISR is working)
-  const products = [...data.products];
-  const top10 = products.splice(0, 10);
-
-  for (let i = top10.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [top10[i], top10[j]] = [top10[j] as Product, top10[i] as Product];
-  }
-
-  const shuffled = [...top10, ...products];
-
-  // biome-ignore lint/suspicious/noConsoleLog: intentional ISR content-change marker
-  console.log(
-    `[ISR] Products cache refreshed at ${new Date().toISOString()} — first item: ${shuffled[0]?.title}`,
-  );
-
-  return { ...data, products: shuffled };
-}
 
 /**
  * Generates metadata based on auth state.
@@ -67,6 +26,10 @@ export async function generateMetadata({ params }: ProductsPageProps): Promise<M
   };
 }
 
+interface ProductsPageProps {
+  params: Promise<{ market: string }>;
+}
+
 /**
  * Products listing page with ISR.
  *
@@ -80,7 +43,7 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
     notFound();
   }
 
-  const { products } = await fetchProducts();
+  const { products } = await fetchProducts({ shuffle: true });
 
   return (
     <section
