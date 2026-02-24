@@ -64,14 +64,17 @@ flowchart TB
         end
         subgraph PACKAGES["packages/"]
             UI["@repo/ui\nShared Components"]
+            API["@repo/api\nData Fetching logic"]
             TYPES["@repo/types\nTypeScript Interfaces"]
             CONST["@repo/constants\nRoutes, Markets, Flags"]
             E2E["@repo/e2e\nPlaywright Tests"]
         end
         PA -->|transpilePackages| UI
+        PA -->|transpilePackages| API
         PA -->|transpilePackages| TYPES
         PA -->|transpilePackages| CONST
         PB -->|transpilePackages| UI
+        PB -->|transpilePackages| API
         PB -->|transpilePackages| TYPES
         PB -->|transpilePackages| CONST
         E2E --> PA
@@ -98,7 +101,7 @@ Packages are **not compiled separately**. Instead:
 ```typescript
 // apps/project-a/next.config.ts
 const nextConfig: NextConfig = {
-  transpilePackages: ['@repo/ui', '@repo/types', '@repo/constants'],
+  transpilePackages: ['@repo/ui', '@repo/types', '@repo/constants', '@repo/api'],
   output: 'standalone',
 };
 ```
@@ -126,7 +129,8 @@ sequenceDiagram
         Middleware-->>Browser: redirect /en/login?callbackUrl=...
     else Valid session
         Middleware->>Server: NextResponse.next()
-        Server->>ISR: fetchProducts()
+        Server->>Server: fetchProducts() (@repo/api)
+        Server->>ISR: fetch()
         alt Cache HIT (< 5min stale)
             ISR-->>Server: cached product list
         else Cache MISS / STALE
@@ -146,16 +150,19 @@ sequenceDiagram
 Products page uses Incremental Static Regeneration with 5-minute revalidation:
 
 ```typescript
-// apps/project-a/app/[market]/products/page.tsx
-async function fetchProducts(): Promise<ProductList> {
+// packages/api/src/products.ts
+export async function fetchProducts(options: FetchProductsOptions = {}): Promise<ProductList> {
+  const { shuffle = false, next = { revalidate: 300, tags: ['products'] } } = options;
   const res = await fetch(
     'https://dummyjson.com/products?limit=30&select=id,title,...',
-    {
-      next: { revalidate: 300, tags: ['products'] },
-    },
+    { next },
   );
-  // ... shuffle first 10 for content variation
+  // ... shuffle logic
+  return { ...data, products: shuffled };
 }
+
+// Usage in apps/project-a/app/[market]/products/page.tsx
+const { products } = await fetchProducts({ shuffle: true });
 ```
 
 **Why `fetch()` with revalidate?**
@@ -336,6 +343,13 @@ rhino-monorepo/
 │   └── project-b/                      # Same structure, Brand B presets
 │
 ├── packages/
+│   ├── api/
+│   │   ├── src/
+│   │   │   ├── products.ts             # fetchProducts implementation
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
 │   ├── ui/
 │   │   ├── src/components/
 │   │   │   ├── Button/
@@ -749,4 +763,5 @@ pnpm docker:up              # Start containers
 | Base components | `packages/ui/src/components/` |
 | CSS tokens | `packages/ui/styles/tokens.css` |
 | Type definitions | `packages/types/src/` |
+| Data fetching | `packages/api/src/products.ts` |
 | Feature flags | `packages/constants/src/featureFlags.ts` |
