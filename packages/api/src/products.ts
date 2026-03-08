@@ -1,7 +1,14 @@
-import type { Product, ProductList } from '@repo/types';
+import type { Product, ProductDetail, ProductList } from '@repo/types';
 
 interface FetchProductsOptions {
   shuffle?: boolean;
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+}
+
+interface FetchOptions {
   next?: {
     revalidate?: number | false;
     tags?: string[];
@@ -48,4 +55,24 @@ export async function fetchProducts(options: FetchProductsOptions = {}): Promise
   );
 
   return { ...data, products: shuffled };
+}
+
+/**
+ * Fetches a single product by ID.
+ */
+export async function fetchProduct(
+  id: string,
+  options: FetchOptions = {},
+): Promise<ProductDetail | null> {
+  const { next = { revalidate: 3600 } } = options;
+
+  const res = await fetch(`https://dummyjson.com/products/${id}`, {
+    next,
+  } as RequestInit);
+
+  if (!res.ok) {
+    return null;
+  }
+
+  return res.json();
 }

@@ -1,9 +1,8 @@
-import { getSession } from '@/lib/auth';
-import { ROUTES, isFeatureEnabled, isValidMarket } from '@repo/constants';
-import type { Market, ProductDetail } from '@repo/types';
+import { fetchProduct } from '@repo/api';
+import { isFeatureEnabled, isValidMarket } from '@repo/constants';
+import type { Market } from '@repo/types';
 import { Button } from '@repo/ui';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 interface ProductPageProps {
@@ -11,34 +10,8 @@ interface ProductPageProps {
 }
 
 /**
- * Pre-generates product pages at build time for all products.
- */
-export async function generateStaticParams() {
-  const res = await fetch('https://dummyjson.com/products?limit=100&select=id');
-  const data = await res.json();
-  return (data.products as Array<{ id: number }>).map((p) => ({
-    slug: String(p.id),
-  }));
-}
-
-/**
- * Fetches a single product by ID.
- */
-async function fetchProduct(id: string): Promise<ProductDetail | null> {
-  const res = await fetch(`https://dummyjson.com/products/${id}`, {
-    next: { revalidate: 3600 },
-  });
-
-  if (!res.ok) {
-    return null;
-  }
-
-  return res.json();
-}
-
-/**
- * Generates metadata based on auth state.
- * Authenticated views are noindex to prevent indexing personalized content.
+ * Generates metadata for the product page.
+ * All product pages are protected and should not be indexed.
  */
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { market, slug } = await params;
@@ -48,8 +21,6 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const product = await fetchProduct(slug);
-  const session = await getSession();
-  const isAuthenticated = session !== null;
 
   if (!product) {
     return { title: 'Product Not Found' };
@@ -58,15 +29,15 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return {
     title: product.title,
     description: product.description,
-    robots: isAuthenticated ? { index: false, follow: false } : { index: true, follow: true },
+    robots: { index: false, follow: false },
   };
 }
 
 /**
- * Product detail page with auth-gated content.
+ * Product detail page (Authenticated Only).
  *
- * Base product info (title, price, images) visible to all users.
- * Reviews, warranty, and return policy only shown to authenticated users.
+ * This route is protected by middleware. If the user reaches this component,
+ * they are guaranteed to be authenticated.
  */
 export default async function ProductPage({ params }: ProductPageProps) {
   const { market, slug } = await params;
@@ -81,8 +52,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const session = await getSession();
-  const isAuthenticated = session !== null;
   const showReviews = isFeatureEnabled('SHOW_REVIEWS', market as Market, 'brand-b');
 
   const discountedPrice =
@@ -253,109 +222,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
 
-      {/* Auth-gated content */}
-      {isAuthenticated ? (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-6)',
-          }}
-        >
-          {/* Shipping & Warranty Info */}
-          <section
-            style={{
-              padding: 'var(--space-6)',
-              background: 'var(--color-surface)',
-              borderRadius: 'var(--radius-lg)',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: 'var(--text-xl)',
-                fontFamily: 'var(--font-heading)',
-                marginBottom: 'var(--space-4)',
-              }}
-            >
-              Product Details
-            </h2>
-            <dl
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'auto 1fr',
-                gap: 'var(--space-2) var(--space-4)',
-              }}
-            >
-              <dt style={{ color: 'var(--color-text-muted)' }}>Shipping:</dt>
-              <dd>{product.shippingInformation}</dd>
-              <dt style={{ color: 'var(--color-text-muted)' }}>Warranty:</dt>
-              <dd>{product.warrantyInformation}</dd>
-              <dt style={{ color: 'var(--color-text-muted)' }}>Return Policy:</dt>
-              <dd>{product.returnPolicy}</dd>
-            </dl>
-          </section>
-
-          {/* Reviews */}
-          {showReviews && product.reviews && product.reviews.length > 0 && (
-            <section>
-              <h2
-                style={{
-                  fontSize: 'var(--text-xl)',
-                  fontFamily: 'var(--font-heading)',
-                  marginBottom: 'var(--space-4)',
-                }}
-              >
-                Customer Reviews ({product.reviews.length})
-              </h2>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 'var(--space-4)',
-                }}
-              >
-                {product.reviews.map((review) => (
-                  <div
-                    key={`${review.reviewerName}-${review.date}`}
-                    style={{
-                      padding: 'var(--space-4)',
-                      background: 'var(--color-surface)',
-                      borderRadius: 'var(--radius-md)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: 'var(--space-2)',
-                      }}
-                    >
-                      <span style={{ fontWeight: 'bold' }}>{review.reviewerName}</span>
-                      <span style={{ color: 'var(--color-text-muted)' }}>{review.rating}/5</span>
-                    </div>
-                    <p style={{ color: 'var(--color-text)' }}>{review.comment}</p>
-                    <p
-                      style={{
-                        fontSize: 'var(--text-sm)',
-                        color: 'var(--color-text-muted)',
-                        marginTop: 'var(--space-2)',
-                      }}
-                    >
-                      {new Date(review.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      ) : (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-6)',
+        }}
+      >
+        {/* Shipping & Warranty Info */}
         <section
           style={{
-            padding: 'var(--space-8)',
+            padding: 'var(--space-6)',
             background: 'var(--color-surface)',
             borderRadius: 'var(--radius-lg)',
-            textAlign: 'center',
           }}
         >
           <h2
@@ -365,21 +244,78 @@ export default async function ProductPage({ params }: ProductPageProps) {
               marginBottom: 'var(--space-4)',
             }}
           >
-            Want to see more?
+            Product Details
           </h2>
-          <p
+          <dl
             style={{
-              color: 'var(--color-text-muted)',
-              marginBottom: 'var(--space-4)',
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr',
+              gap: 'var(--space-2) var(--space-4)',
             }}
           >
-            Login to see reviews, warranty information, and full product details.
-          </p>
-          <Link href={`${ROUTES.login(market)}?callbackUrl=${ROUTES.product(market, slug)}`}>
-            <Button variant="primary">Login to see full details</Button>
-          </Link>
+            <dt style={{ color: 'var(--color-text-muted)' }}>Shipping:</dt>
+            <dd>{product.shippingInformation}</dd>
+            <dt style={{ color: 'var(--color-text-muted)' }}>Warranty:</dt>
+            <dd>{product.warrantyInformation}</dd>
+            <dt style={{ color: 'var(--color-text-muted)' }}>Return Policy:</dt>
+            <dd>{product.returnPolicy}</dd>
+          </dl>
         </section>
-      )}
+
+        {/* Reviews */}
+        {showReviews && product.reviews && product.reviews.length > 0 && (
+          <section>
+            <h2
+              style={{
+                fontSize: 'var(--text-xl)',
+                fontFamily: 'var(--font-heading)',
+                marginBottom: 'var(--space-4)',
+              }}
+            >
+              Customer Reviews ({product.reviews.length})
+            </h2>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-4)',
+              }}
+            >
+              {product.reviews.map((review) => (
+                <div
+                  key={`${review.reviewerName}-${review.date}`}
+                  style={{
+                    padding: 'var(--space-4)',
+                    background: 'var(--color-surface)',
+                    borderRadius: 'var(--radius-md)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: 'var(--space-2)',
+                    }}
+                  >
+                    <span style={{ fontWeight: 'bold' }}>{review.reviewerName}</span>
+                    <span style={{ color: 'var(--color-text-muted)' }}>{review.rating}/5</span>
+                  </div>
+                  <p style={{ color: 'var(--color-text)' }}>{review.comment}</p>
+                  <p
+                    style={{
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--color-text-muted)',
+                      marginTop: 'var(--space-2)',
+                    }}
+                  >
+                    {new Date(review.date).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </article>
   );
 }
